@@ -1,58 +1,31 @@
 # api_implementation
-
 """
-Created on Fri Apr  4 01:15:16 2025
+Created on Fri Apr  4 01:49:36 2025
 
 @author: Asus
 """
 
-from fastapi import FastAPI
-from pydantic import BaseModel
-import pickle
 import json
+import requests
+
+url = 'http://127.0.0.1:8000/diabetes_prediction'
 
 
-app = FastAPI()
+input_data_for_model = {
+    
+    'Pregnancies' : 1,
+    'Glucose' : 85,
+    'BloodPressure' : 66,
+    'SkinThickness' : 29,
+    'Insulin' : 0,
+    'BMI' : 26.6,
+    'DiabetesPedigreeFunction' : 0.351,
+    'Age' : 31
+    
+    }
 
-class model_input(BaseModel):
-    
-    Pregnancies : int
-    Glucose : int
-    BloodPressure : int
-    SkinThickness :int
-    Insulin :int
-    BMI : float 
-    DiabetesPedigreeFunction : float
-    Age : int
-    
-    
-#loading the saved model
-diabetes_model = pickle.load(open('diabetes.sav','rb'))
+input_json = json.dumps(input_data_for_model)
 
+response = requests.post(url, data=input_json)
 
-@app.post('/diabetes_prediction')
-def diabetes_pred(input_parameters : model_input):
-    
-    input_data = input_parameters.json()
-    input_dictionary = json.loads(input_data)
-    
-    preg = input_dictionary['Pregnancies']
-    glu = input_dictionary['Glucose']
-    bp = input_dictionary['BloodPressure']
-    skin = input_dictionary['SkinThickness']
-    insulin = input_dictionary['Insulin']
-    bmi = input_dictionary['BMI']
-    dpf = input_dictionary['DiabetesPedigreeFunction']
-    age = input_dictionary['Age']
-    
-    
-    
-    input_list = [preg, glu, bp, skin, insulin, bmi, dpf, age]
-    
-    prediction = diabetes_model.predict([input_list])
-    
-    if prediction[0] == 0:
-        return 'The person is not Diabetic'
-    
-    else:
-        return 'The person is Diabetic'
+print(response.text)
